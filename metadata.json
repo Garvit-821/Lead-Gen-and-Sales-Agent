@@ -1,0 +1,6 @@
+{
+  "name": "AI Lead Gen & Audit Master",
+  "description": "Production-grade AI platform for lead discovery, website validation, and high-conversion audits.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

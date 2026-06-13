@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Business Lead",
+      "description": "Represents a discovered business lead.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "location": { "type": "string" },
+        "website": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "score": { "type": "number" },
+        "status": { "type": "string", "enum": ["new", "audited", "contacted", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "ownerId": { "type": "string" },
+        "auditId": { "type": "string" }
+      },
+      "required": ["name", "ownerId", "status", "createdAt"]
+    },
+    "Audit": {
+      "title": "Website Audit",
+      "description": "An AI-generated audit report for a business website.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "leadId": { "type": "string" },
+        "website": { "type": "string" },
+        "scores": {
+          "type": "object",
+          "properties": {
+            "ui": { "type": "number" },
+            "seo": { "type": "number" },
+            "performance": { "type": "number" },
+            "conversion": { "type": "number" }
+          }
+        },
+        "issues": { "type": "array", "items": { "type": "string" } },
+        "pitch": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["leadId", "createdAt"]
+    },
+    "Campaign": {
+      "title": "Outreach Campaign",
+      "description": "An outreach campaign targeting a list of leads.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "active", "completed"] },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "ownerId", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Collection of business leads."
+    },
+    "/audits/{auditId}": {
+      "schema": "Audit",
+      "description": "Collection of website audits."
+    },
+    "/campaigns/{campaignId}": {
+      "schema": "Campaign",
+      "description": "Collection of outreach campaigns."
+    }
+  }
+}

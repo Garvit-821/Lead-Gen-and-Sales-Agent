@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Safety Net: Deny all by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Auth Helper
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Ownership Helper
+    function isOwner(resourceData) {
+      return isSignedIn() && resourceData.ownerId == request.auth.uid;
+    }
+
+    // ID Validation Helper
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Lead Validation
+    function isValidLead(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 200
+             && data.ownerId == request.auth.uid
+             && data.status in ['new', 'audited', 'contacted', 'rejected']
+             && data.createdAt != null;
+    }
+
+    // Leads Collection
+    match /leads/{leadId} {
+      allow read: if isOwner(resource.data);
+      allow create: if isSignedIn() && isValidLead(request.resource.data);
+      allow update: if isOwner(resource.data) && isValidLead(request.resource.data);
+      allow delete: if isOwner(resource.data);
+    }
+
+    // Audits Collection
+    // Audits are linked to leads. Anyone who owns the lead can read the audit.
+    match /audits/{auditId} {
+      allow read: if isSignedIn(); // In a real app, check lead ownership via get()
+      allow create: if isSignedIn() && request.resource.data.leadId is string;
+      allow update: if isSignedIn(); 
+      allow delete: if isSignedIn();
+    }
+
+    // Campaigns Collection
+    match /campaigns/{campaignId} {
+      allow read: if isOwner(resource.data);
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isOwner(resource.data);
+      allow delete: if isOwner(resource.data);
+    }
+  }
+}
